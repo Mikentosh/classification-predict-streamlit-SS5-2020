@@ -90,6 +90,10 @@ def main():
                 input_data['sentiment'].plot.hist()
                 st.pyplot()
 
+            if st.button("Word Cloud"):
+                input_data['sentiment'].plot.hist()
+                st.pyplot()
+
 
 
 
