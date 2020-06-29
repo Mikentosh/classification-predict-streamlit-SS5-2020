@@ -59,12 +59,39 @@ def main():
 
     # Building out the "Information" page
     if selection == "Information":
-    	#st.info("General Information")
+        # st.info("General Information")
     	# You can read a markdown file from supporting resources folder
+
     	st.markdown("""
-        The aim of this web application is to perform climate change  sentiment classification.
-        This will assist market researchers to know how their products may be received by the
-        general public in relation with climate change
+        ### What is this?
+        This is a web application that sentiment classifies sentiment of posts made on twitter.
+
+        """)
+        # image = Image.open('images/twitter_sentiment_analysis.png')
+        # st.image(image, use_column_width=True)
+
+    	image = Image.open('images/twitter_sentiment_analysis.png')
+
+    	st.image(image, use_column_width=True)
+
+    	st.markdown("""
+        ### Get Started!
+
+        #### Look at the raw data
+        
+        _Step 1:_ Have a look at the `Raw data and labels` below by ticking the `Show raw data` option
+
+        #### Make a prediction
+
+        _Step 2:_ Click on the `Prediction` page
+
+        _Step 2.1:_ [steps to predict]
+
+        #### Explore the analysis results
+
+        _Step 3:_ Click on `Exploratory Data Analysis` page
+
+        _Step 3.1:_ [steps to explore the EDA page]
 
         """)
 
