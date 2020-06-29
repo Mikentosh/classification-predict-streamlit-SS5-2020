@@ -34,10 +34,14 @@ from PIL import Image
 import seaborn as sns
 from wordcloud import WordCloud, STOPWORDS
 
+from preprocess import preprocess
+
 
 # Vectorizer
 news_vectorizer = open("resources/models/tfidfvect.pkl","rb")
 tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl file
+
+
 
 # Load your raw data
 raw = pd.read_csv("resources/data/train.csv")
@@ -64,7 +68,7 @@ def main():
 
     	st.markdown("""
         ### What is this?
-        This is a web application that sentiment classifies sentiment of posts made on twitter.
+        This is a web application that classifies sentiment of posts made on twitter.
 
         """)
         # image = Image.open('images/twitter_sentiment_analysis.png')
@@ -198,12 +202,12 @@ def main():
             model_list = ['Logistic Regression','Naive Bayes']
             model_choice = st.selectbox("Select Model",model_list)
 
-            model_dict = {"Logistic Regression":'Logistic_regression.pkl'}
+            model_dict = {"Logistic Regression":'Logistic_regression.plk'}
             model = model_dict[model_choice]
 
             if st.button("Classify"):
             	# Transforming user input with vectorizer
-            	vect_text = tweet_cv.transform([tweet_text]).toarray()
+            	vect_text = preprocess(input_data)
             	# Load your .pkl file with the model of your choice + make predictions
             	# Try loading in multiple models to give the user a choice
             	predictor = joblib.load(open(os.path.join("resources/models/"+model),"rb"))
