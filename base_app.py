@@ -77,27 +77,33 @@ def main():
     	st.markdown("""
         ### Get Started!
 
-        #### Look at the raw data
-        
-        _Step 1:_ Have a look at the `Raw data and labels` below by ticking the `Show raw data` option
+        ### _Step 1:_  `Perform EDA on raw dataset` \n
+            - Choose EDA option on the side bar
+            - Look at properties of the dataset
+            - Draw insights from visuals (Histogram, WordCloud)
 
-        #### Make a prediction
+        ### _Step 2:_ ` Make Predictions` \n
 
-        _Step 2:_ Click on the `Prediction` page
+            - Choose prediction option on the side bar
+            - choose to classify a single tweet or multiple tweets in a CSV
+            - Type the text or upload csv file depending on above choice
+            - Choose your classification model
+            - click on `classify` to perfom the classification
 
-        _Step 2.1:_ [steps to predict]
+        #### Note: Dataset format \n
+            - Dataset must have the same structure as:
+            -----------------------------------------------------------
+            |message                          |tweetid|
+            -----------------------------------------------------------
+            |global warming is a serious issue| 1200  |
 
-        #### Explore the analysis results
-
-        _Step 3:_ Click on `Exploratory Data Analysis` page
-
-        _Step 3.1:_ [steps to explore the EDA page]
+            - arrangement of the columns is not important, as long as the names are the same
 
         """)
 
-    	st.subheader("Raw Twitter data and label")
-    	if st.checkbox('Show raw data'): # data is hidden if box is unchecked
-    		st.write(raw[['sentiment', 'message']]) # will write the df to the page
+    	#st.subheader("Raw Twitter data and label")
+    	#if st.checkbox('Show raw data'): # data is hidden if box is unchecked
+    	#	st.write(raw[['sentiment', 'message']]) # will write the df to the page
 
         #building out the sentiment analysis page
 
@@ -107,9 +113,14 @@ def main():
         image = Image.open('images/eda-header.png')
         st.image(image, use_column_width=True)
 
-        st.info('I am the goat')
+        st.info("""
+            Let us start by understanding our data set by perfoming the EDA.
+            This will help us make educated assumptions on our data before any predictions and
+            guide us to correctly interpret the results.
+
+        """)
         #st.subheader("Exploratory Data Analysis")
-        input_data = st.file_uploader("Upload", type="csv")
+        input_data = st.file_uploader("Begin by uploading a csv file", type="csv")
         if input_data:
             if input_data:
                 input_data = pd.read_csv(input_data)
@@ -228,13 +239,53 @@ def main():
                     classifier = joblib.load(open(os.path.join("resources/models/"+model),"rb"))
 
                     results = classifier.predict(text_data)
-                    st.write(results)
+                    input_data['results'] = results
+
+                    visuals = ["Histogram","Pie chart"]
+                    Visual_choice = st.selectbox("Visualize your results",visuals)
+
+                    dim = (15.0, 10.0)
+                    fig, ax = plt.subplots(figsize=dim)
+                    if Visual_choice == "Histogram":
+
+                        cmrmap = sns.color_palette('YlGn')
+                        sns.set_palette(cmrmap)
+
+                        # Connect data to chart
+                        sns.countplot(x='results', data=input_data, order=[-1, 0, 1, 2])
+
+                        # Create labels
+                        plt.title('Distribution of Sentiments in the prediction results', fontsize=30)
+                        plt.ylabel('Count of Predictions',fontsize=30)
+                        plt.xlabel('Sentiment Value',fontsize=30)
+
+                        plt.xticks(fontsize=12)
+                        plt.yticks(fontsize=12)
+                        st.pyplot()
+
+                    if Visual_choice == "Pie Chart":
+
+                        # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+
+                        index = input_data['sentiment'].value_counts().index
+                        index_dic = {-1:'anti',0:'neutral',1:'pro',2:'news'}
+
+                        labels = index_dic[index[0]], index_dic[index[1]], index_dic[index[2]], index_dic[index[3]]
+                        sizes = [round(number*100/len(input_data['sentiment']),2) for number in list(input_data['sentiment'].value_counts())]
+                        explode = (0, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
+
+                        fig1, ax1 = plt.subplots()
+                        ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+                                shadow=True, startangle=90)
+                        ax1.axis('equal');  # Equal aspect ratio ensures that pie is drawn as a circle.
+                        st.pyplot()
+
 
                     if st.button("Save as csv"):
                         csv = results.to_csv(index=False)
                         b64 = base64.b64encode(csv.encode()).decode()
                         href = f'<a href="results:file/csv;base64,{b64}">Download CSV File</a> (right-click and save as &lt;some_name&gt;.csv)'
-                        st.markdown(href, unsafe_allow_html=True)
+                        st.markdown(href)
 
 
      # Creating a text box for user input
