@@ -1,7 +1,18 @@
 
+def comment(key):
+    if key ==-1:
+        return "Anti climate change tweet"
 
+    elif key ==0:
+        return "Neutral climate change tweet"
 
-def preprocess(df):
+    elif key ==1:
+        return "Pro climate change tweet"
+
+    else:
+        return "News on climate change"
+
+def preprocess(data, task):
     import scipy
     import joblib,os
     import re
@@ -149,45 +160,71 @@ def preprocess(df):
 
 
 
-
-    train_df = df.copy()
-    train_df['message'] = df['message'].apply(clean_url)
-
-
-    # Remove punctuation
-    train_df['message'] = train_df['message'].apply(remove_punctuation_numbers)
+    if task == "csv":
+        train_df = data.copy()
+        train_df['message'] = data['message'].apply(clean_url)
 
 
-
-    # Make lower case
-    train_df['message'] = train_df['message'].apply(make_lower)
-
-
-    ## Remove rt
-    train_df['message'] = train_df['message'].replace(to_replace = r'rt', value = '', regex = True)
-    ##cleaning function
-    train_df['message'] = train_df['message'].apply(clean)
-
-    lemmatizer = open("resources/models/lemmatizer.pkl","rb")
-    lemmatizer = joblib.load(lemmatizer)
-    train_df['lemma'] = [' '.join([lemmatizer.lemmatize(word) for word in text.split(' ')])for text in train_df['message']]
-
-
-    vectorizer = open("resources/models/tf_vectorizer.pkl","rb")
-    vectorizer = joblib.load(vectorizer)
-
-    count_vectorizer = open("resources/models/count_vectorizer.pkl","rb")
-    count_vectorizer = joblib.load(count_vectorizer)
+        # Remove punctuation
+        train_df['message'] = train_df['message'].apply(remove_punctuation_numbers)
 
 
 
-    vectorized=vectorizer.transform(train_df['lemma'])
+        # Make lower case
+        train_df['message'] = train_df['message'].apply(make_lower)
 
 
-    X = train_df['lemma']
-    count_vectorized=count_vectorizer.transform(train_df['lemma'])
+        ## Remove rt
+        train_df['message'] = train_df['message'].replace(to_replace = r'rt', value = '', regex = True)
+        ##cleaning function
+        train_df['message'] = train_df['message'].apply(clean)
 
-    X = scipy.sparse.hstack([vectorized, count_vectorized])
+        lemmatizer = open("resources/models/lemmatizer.pkl","rb")
+        lemmatizer = joblib.load(lemmatizer)
+        train_df['lemma'] = [' '.join([lemmatizer.lemmatize(word) for word in text.split(' ')])for text in train_df['message']]
+
+
+        vectorizer = open("resources/models/tf_vectorizer.pkl","rb")
+        vectorizer = joblib.load(vectorizer)
+
+        count_vectorizer = open("resources/models/count_vectorizer.pkl","rb")
+        count_vectorizer = joblib.load(count_vectorizer)
+
+
+
+        vectorized=vectorizer.transform(train_df['lemma'])
+
+
+        X = train_df['lemma']
+        count_vectorized=count_vectorizer.transform(train_df['lemma'])
+
+        X = scipy.sparse.hstack([vectorized, count_vectorized])
+
+
+    elif task == 'single':
+        X = clean_url(data)
+        X = clean(remove_punctuation_numbers(X).lower().replace('rt',''))
+        lemmatizer = open("resources/models/lemmatizer.pkl","rb")
+        lemmatizer = joblib.load(lemmatizer)
+        X = ' '.join([lemmatizer.lemmatize(word) for word in X.split()])
+
+
+        vectorizer = open("resources/models/tf_vectorizer.pkl","rb")
+        vectorizer = joblib.load(vectorizer)
+
+        count_vectorizer = open("resources/models/count_vectorizer.pkl","rb")
+        count_vectorizer = joblib.load(count_vectorizer)
+
+
+
+        vectorized=vectorizer.transform([X])
+
+
+        count_vectorized=count_vectorizer.transform([X])
+
+        X = scipy.sparse.hstack([vectorized, count_vectorized])
+
+
 
 
 
