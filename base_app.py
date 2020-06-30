@@ -35,6 +35,7 @@ import seaborn as sns
 from wordcloud import WordCloud, STOPWORDS
 
 from preprocess import preprocess
+from preprocess import comment
 
 
 # Vectorizer
@@ -202,12 +203,12 @@ def main():
             model_list = ['Logistic Regression','Naive Bayes']
             model_choice = st.selectbox("Select Model",model_list)
 
-            model_dict = {"Logistic Regression":'Logistic_regression.plk'}
+            model_dict = {"Logistic Regression":'Logistic_regression.pkl'}
             model = model_dict[model_choice]
 
             if st.button("Classify"):
             	# Transforming user input with vectorizer
-            	vect_text = preprocess(input_data)
+            	vect_text = preprocess(tweet_text,task='single')
             	# Load your .pkl file with the model of your choice + make predictions
             	# Try loading in multiple models to give the user a choice
             	predictor = joblib.load(open(os.path.join("resources/models/"+model),"rb"))
@@ -216,7 +217,7 @@ def main():
             	# When model has successfully run, will print prediction
             	# You can use a dictionary or similar structure to make this output
             	# more human interpretable.
-            	st.success("Text Categorized as: {}".format(prediction))
+            	st.success(comment(prediction))
 
 
         else:
@@ -239,7 +240,7 @@ def main():
 
                 if st.button("Classify File"):
                     #transforming text
-                    text_data = tweet_cv.transform(input_data['message']).toarray()
+                    text_data = preprocess(input_data, task='csv')
                     classifier = joblib.load(open(os.path.join("resources/models/"+model),"rb"))
 
                     results = classifier.predict(text_data)
